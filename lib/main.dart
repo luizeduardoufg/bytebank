@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() => runApp(App());
 
@@ -14,7 +13,13 @@ class App extends StatelessWidget {
   }
 }
 
-class FormularioTransferencia extends StatelessWidget {
+class FormularioTransferencia extends StatefulWidget {
+  @override
+  _FormularioTransferenciaState createState() =>
+      _FormularioTransferenciaState();
+}
+
+class _FormularioTransferenciaState extends State<FormularioTransferencia> {
   final TextEditingController _controladorCampoNumeroConta =
           TextEditingController(),
       _controladorCampoValor = TextEditingController();
@@ -25,27 +30,29 @@ class FormularioTransferencia extends StatelessWidget {
       appBar: AppBar(
         title: Text('Criando transferẽncia'),
       ),
-      body: Column(
-        children: [
-          CampoInput(
-            controller: _controladorCampoNumeroConta,
-            labelText: 'Numero da conta',
-            hintText: '0000',
-          ),
-          CampoInput(
-            controller: _controladorCampoValor,
-            labelText: 'Valor',
-            hintText: '0.00',
-            icon: Icon(Icons.monetization_on),
-          ),
-          ElevatedButton(
-            child: Text('Transferir'),
-            onPressed: () {
-              final Transferencia transferencia = _criaTransferencia();
-              Navigator.pop(context, transferencia);
-            },
-          ),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            CampoInput(
+              controller: _controladorCampoNumeroConta,
+              labelText: 'Numero da conta',
+              hintText: '0000',
+            ),
+            CampoInput(
+              controller: _controladorCampoValor,
+              labelText: 'Valor',
+              hintText: '0.00',
+              icon: Icon(Icons.monetization_on),
+            ),
+            ElevatedButton(
+              child: Text('Transferir'),
+              onPressed: () {
+                final Transferencia transferencia = _criaTransferencia();
+                Navigator.pop(context, transferencia);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -90,19 +97,26 @@ class CampoInput extends StatelessWidget {
   }
 }
 
-class ListaTransferencias extends StatelessWidget {
+class ListaTransferencias extends StatefulWidget {
+  final List<Transferencia> _transferencias = [];
+
+  @override
+  _ListaTransferenciasState createState() => _ListaTransferenciasState();
+}
+
+class _ListaTransferenciasState extends State<ListaTransferencias> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Transferências'),
       ),
-      body: Column(
-        children: [
-          ItemTransferencia(Transferencia(100.00, '1000')),
-          ItemTransferencia(Transferencia(200.00, '1001')),
-          ItemTransferencia(Transferencia(300.00, '1002')),
-        ],
+      body: ListView.builder(
+        itemCount: widget._transferencias.length,
+        itemBuilder: (context, index) {
+          final transferencia = widget._transferencias[index];
+          return ItemTransferencia(transferencia);
+        },
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
@@ -113,7 +127,10 @@ class ListaTransferencias extends StatelessWidget {
               builder: (context) => FormularioTransferencia(),
             ),
           );
-          future.then((transferencia) => debugPrint('$transferencia'));
+          future.then((transferencia) {
+            if (transferencia != null)
+              setState(() => widget._transferencias.add(transferencia));
+          });
         },
       ),
     );
