@@ -8,7 +8,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: FormularioTransferencia(),
+        body: ListaTransferencias(),
       ),
     );
   }
@@ -40,20 +40,25 @@ class FormularioTransferencia extends StatelessWidget {
           ),
           ElevatedButton(
             child: Text('Transferir'),
-            onPressed: () => _criaTransferencia(),
+            onPressed: () {
+              final Transferencia transferencia = _criaTransferencia();
+              Navigator.pop(context, transferencia);
+            },
           ),
         ],
       ),
     );
   }
 
-  void _criaTransferencia() {
-    final String _numeroConta = _controladorCampoNumeroConta.text;
-    final double _valor = double.parse(_controladorCampoValor.text);
+  Transferencia _criaTransferencia() {
+    final String numeroConta = _controladorCampoNumeroConta.text;
+    final double valor = double.parse(_controladorCampoValor.text);
 
-    if (_numeroConta != null && _valor != null) {
-      final _transferencia = Transferencia(_valor, _numeroConta);
+    if (numeroConta != null && valor != null) {
+      return Transferencia(valor, numeroConta);
     }
+
+    return null;
   }
 }
 
@@ -101,7 +106,15 @@ class ListaTransferencias extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          final Future<Transferencia> future = Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FormularioTransferencia(),
+            ),
+          );
+          future.then((transferencia) => debugPrint('$transferencia'));
+        },
       ),
     );
   }
@@ -125,13 +138,17 @@ class ItemTransferencia extends StatelessWidget {
 }
 
 class Transferencia {
-  final double valor;
-  final String numeroConta;
+  final double _valor;
+  final String _numeroConta;
 
-  Transferencia(this.valor, this.numeroConta);
+  Transferencia(this._valor, this._numeroConta);
+
+  get valor => _valor;
+
+  get numeroConta => _numeroConta;
 
   @override
   String toString() {
-    return 'Transferencia{valor: $valor, numeroConta: $numeroConta}';
+    return 'Transferencia{valor: $_valor, numeroConta: $_numeroConta}';
   }
 }
